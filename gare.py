@@ -1,14 +1,10 @@
-# JNG: il vaudrait mieux importer sous la forme suivante:
-# import tkinter as Tk
-from tkinter import *
+# JNG: correction de l'import
+import tkinter as Tk
 
-# JNG: Même remarque
-# import bibliotheque as biblio
-from bibliotheque import *
-# Idem
-from util_dijkastra import *
-# Idem
-from test_folium import *
+import bibliotheque as biblio
+import util_dijkastra as dijk
+import test_folium as folium
+import util_donnees as util
 
 # JNG: Remarques générales
 # 1 - Il faudrait prendre la peine de donner
@@ -35,71 +31,77 @@ class GUI():
     """
     # constructeur de l'interface graphique
     def __init__(self):
-        self.__table = lit_csv_dict("liste-des-gares.csv",";","UTF-8")
+        self.__table = biblio.lit_csv_dict("liste-des-gares.csv", ";", "UTF-8")
 
-        #on déclare des gares "bidon" - JNG: Pourquoi bidon?
-        # Créer une petite fonction dont le nom permet de comprendre
-        # ce qu'elle fait
-        self.__gares = extrait_table(self.__table, "DEPARTEMEN", "FINISTERE") \
-            + extrait_table(self.__table, "DEPARTEMEN", "COTES-D'ARMOR") \
-            + extrait_table(self.__table, "DEPARTEMEN", "MORBIHAN") \
-            + extrait_table(self.__table, "DEPARTEMEN", "ILLE-ET-VILAINE")
+        # JNG: Remplacement du code de chargement des gares bretonnes par une
+        # fonction
+        # La variable 'gares' n'est utilisée que comme "variable tampon".
+        # Il n'est pas utile que ce soit une propriété de la classe GUI.
+        # Donc 'self.__gares' n'est pas utile
+        gares = util.extrait_gares_region(self.__table,
+                                          util.DEPARTEMENTS_BRETONS)
 
-        #travail d'ewan
-        # JNG: ne pas oublier d'enlever les "print" de débogage avant de
-        # rendre le projet
+        # travail d'Ewan
+        code_ligne = util.liste_lignes(gares)
 
-        print("test : ",self.__gares[0])
-        code_ligne = liste_lignes(self.__gares)
-
-        print (code_ligne)
+        print(code_ligne)
 
         # JNG: La variable 'e' n'est pas utilisée dans la boucle
-        # Le code n'est pas très clair: on a l'impression que 'table_filtree'
-        # est écrasée à chaque tour de boucle
-        for e in code_ligne:
-            self.table_filtree = projection(self.__gares, "COMMUNE")
-            self.table_filtree_finale = []
-        for elt in self.table_filtree :
-            for cle, valeur in elt.items() :
-                self.table_filtree_finale.append(valeur)
-        print(self.table_filtree_finale)
+        # Et la boucle sur code_ligne ne sert à rien
+        # Utilisation de variables locales (sans 'self.')
+#        for e in code_ligne:
+        # Récupère la liste des communes sous la forme suivante
+        # {"COMMUNE": 'nom de la commune' }
+        table_filtree = biblio.projection(gares, "COMMUNE")
+
+        table_filtree_finale = []
+        # Récupération uniquement du nom de la commune (sans la clé)
+        for elt in table_filtree:
+            for cle, valeur in elt.items():
+                table_filtree_finale.append(valeur)
+#        print(table_filtree_finale)
+
         # initialisation de l'interface graphique
-        self.fenetre = Tk()
+        self.fenetre = Tk.Tk()
 
-
-        #on définit le premier frame avec un titre
-        self.cadre1 = LabelFrame(self.fenetre,  text='Choisissez la gare de départ')
+        # on définit le premier frame avec un titre
+        self.cadre1 = Tk.LabelFrame(self.fenetre,
+                                    text='Choisissez la gare de départ')
         self.cadre1.pack()
 
-        #options1 contient la valeur sélectionnée par l'utilisateur
-        self.options1 = StringVar(self.cadre1)
-        #on initialise options1 vide
+        # options1 contient la valeur sélectionnée par l'utilisateur
+        self.options1 = Tk.StringVar(self.cadre1)
+        # on initialise options1 vide
         self.options1.set("")
 
-        #opt1 contient les choix possibles
-        self.opt1 = OptionMenu(self.cadre1, self.options1, *self.table_filtree_finale)
+        # opt1 contient les choix possibles
+        self.opt1 = Tk.OptionMenu(self.cadre1, self.options1,
+                                  *table_filtree_finale)
         self.opt1.config(width=50)
         self.opt1.pack()
 
-        self.cadre2 = LabelFrame(self.fenetre,  text='Choisissez la gare darrivée')
+        self.cadre2 = Tk.LabelFrame(self.fenetre,
+                                    text="Choisissez la gare d'arrivée")
         self.cadre2.pack()
 
-        self.options2 = StringVar(self.cadre2)
+        self.options2 = Tk.StringVar(self.cadre2)
         self.options2.set("")
 
-        self.opt2 = OptionMenu(self.cadre2, self.options2, *self.table_filtree_finale)
+        self.opt2 = Tk.OptionMenu(self.cadre2, self.options2,
+                                  *table_filtree_finale)
         self.opt2.config(width=50)
         self.opt2.pack()
 
-        #on associe l'appui du bouton à calcule_itineraire
-
-        self.plot_button = Button(master = self.fenetre, command = self.calcule_itineraire, height = 2, width = 20, text = "calcul de l'itinéraire")
+        # on associe l'appui du bouton à calcule_itineraire
+        self.plot_button = Tk.Button(master=self.fenetre,
+                                     command=self.calcule_itineraire,
+                                     height=2, width=20,
+                                     text="calcul de l'itinéraire")
         self.plot_button.pack()
 
         self.fenetre.mainloop()
 
-#en cours marine
+# en cours marine
     # JNG: il faudrait distinguer la fonction appelée lors du clic sur le
     # bouton de celle servant effectivement à calculer l'itineraire
     # (module util_dijkastra)
@@ -109,7 +111,7 @@ class GUI():
 
         ville_depart = self.options1.get()
         ville_arrivee = self.options2.get()
-        #distance = ('ville_depart' - 'ville_arrivee')
+        # distance = ('ville_depart' - 'ville_arrivee')
         print(ville_depart, "  ", ville_arrivee)
     """
             chemin = [ville_arrivee]
@@ -120,33 +122,9 @@ class GUI():
             return chemin
     """
 
-
-#chemin = calcule_itineraire('0', '6', distance)
-        #votre code ici
+# chemin = calcule_itineraire('0', '6', distance)
+# votre code ici
 
 # print("le resultat")
-#travail d'elouan
-def liste_lignes(gares):
-    liste = []
-    for e in gares:
-        if e["CODE_LIGNE"] not in liste :
-            liste.append(e["CODE_LIGNE"])
-    # print(liste_lignes)
-    return liste
-
-"""#print(calcule_itineraire('0', '6', distance))
-#print(chemin)"""
-#trvail de marine
-def dictionnaire_lignes(gares):
-    dictionnaire = {}
-    cle_dictionnaire = liste_lignes(gares)
-
-    for element in cle_dictionnaire :
-        dictionnaire[element]= []
-        for ligne in gares :
-            if ligne["CODE_LIGNE"] == element :
-                dictionnaire[element].append((ligne["COMMUNE"], ligne["PK"]))
-    return dictionnaire
-#print(dictionnaire_lignes(gares)))
 
 app = GUI()
