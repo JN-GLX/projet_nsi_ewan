@@ -5,6 +5,9 @@ Module regroupant des fonctions de traitement des données du fichier
 
 import bibliotheque as biblio
 
+
+SEPARATEUR_DONNEES = ";"
+ENCODAGE_DONNEES = "UTF-8"
 DEPARTEMENTS_BRETONS = ["FINISTERE",
                         "COTES-D'ARMOR",
                         "MORBIHAN",
@@ -19,6 +22,17 @@ def extrait_gares_region(table, departements):
     for departement in departements:
         gares += biblio.extrait_table(table, "DEPARTEMEN", departement)
 
+    return gares
+
+
+def initialisation_donnees_gares(fichier_gares):
+    """
+    Chargement des données du fichier dans une table et
+    extraction des gares bretonnes
+    """
+    table = biblio.lit_csv_dict(fichier_gares,
+                                SEPARATEUR_DONNEES, ENCODAGE_DONNEES)
+    gares = extrait_gares_region(table, DEPARTEMENTS_BRETONS)
     return gares
 
 
@@ -51,3 +65,10 @@ def dictionnaire_lignes(gares):
                 dictionnaire[element].append((ligne["COMMUNE"], ligne["PK"]))
     return dictionnaire
 
+
+def format_point_km(point_kilometrique):
+    """
+    Convertit le point kilométrique extrait du fichier csv en valeur
+    décimale valide: remplace le '+' par un '.'
+    """
+    return point_kilometrique.replace('+', '.')

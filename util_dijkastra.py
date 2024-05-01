@@ -3,17 +3,13 @@ Calcul d'itinéraire à l'aide de l'algorithme Dijkstra
 """
 
 # le fichier doit contenir les fonctions dijskstra(ville_depart),
-# calcul_itineraire(ville_depart, ville_arrivéé)
+# calcul_itineraire(ville_depart, ville_arrivée)
 from math import inf
 import bibliotheque as biblio
 import util_donnees as util
 
-# JNG: Attention à nommer les variables de manière explicite:
-# ça aide à la compréhension du code
-# Les éditeurs de code aident à la saisie, donc il ne faut pas avoir peur
-# de la longueur du nom de la variable
-# par exemple: 'ville_depart', on pense que c'est la ville de départ, alors
-# qu'en fait c'est la liste des gares des départements bretons...
+# JNG: Modification de certains noms de variables pour les rendre plus
+# explicites et améliorer la lecture et la compréhension du code
 
 
 def dijkstra(liste_villes, sommet_depart):
@@ -101,17 +97,38 @@ def dijkstra(liste_villes, sommet_depart):
     return distances
 
 
-# distances = dijskstra(voisins, "0")
-# print(distances)
-table = biblio.lit_csv_dict("liste-des-gares.csv", ";", "UTF-8")
+def creer_graphe_gares(gares):
+    """
+    Création d'un graphe à partir de la liste des gares sous la forme d'un
+    dictionnaire, dont les clés sont les villes et les valeurs sont les
+    voisins avec le PK associé.
+    """
 
-gares = util.extrait_gares_region(table, util.DEPARTEMENTS_BRETONS)
-# travail d'ewan
-gares_triees = biblio.projection(gares, "COMMUNE")
-voisins = {}
-for gare in gares_triees:  # JNG: gare
-    voisins[gare["COMMUNE"]] = {}
-    # JNG: il manque du code ou bien c'est voulu?
-    # si c'est voulu il faut l'expliquer en commentaire
+    # travail d'ewan
+    # Extraction des gares avec le code ligne associé et la valeur du point
+    # kilométrique
+    gares_triees = biblio.projection(gares, ["COMMUNE", "CODE_LIGNE", "PK"])
 
-print(voisins)
+    # Création d'un dictionnaire des lignes avec les gares et PK associés
+    dico_lignes = util.dictionnaire_lignes(gares)
+
+    voisins = {}
+    for gare in gares_triees:
+        ville = gare["COMMUNE"]
+        # Le PK de la ville devient le point de référence pour le calcul
+        # des distances
+        point_km_ref = float(util.format_point_km(gare["PK"]))
+
+        # Liste des gares appartenant à la même ligne
+        gares_ligne = dico_lignes[gare["CODE_LIGNE"]]
+
+        voisins[ville] = {}
+        for ville_ligne, point_km in gares_ligne:
+            if ville_ligne != ville:
+                # Calcul de la distance à partir du point de référence
+                distance = abs(point_km_ref -
+                               float(util.format_point_km(point_km)))
+                # ajout du voisin
+                voisins[ville][ville_ligne] = distance
+
+    return voisins
