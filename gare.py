@@ -1,22 +1,62 @@
+# JNG: il vaudrait mieux importer sous la forme suivante:
+# import tkinter as Tk
 from tkinter import *
+
+# JNG: Même remarque
+# import bibliotheque as biblio
 from bibliotheque import *
+# Idem
 from util_dijkastra import *
+# Idem
 from test_folium import *
+
+# JNG: Remarques générales
+# 1 - Il faudrait prendre la peine de donner
+# des noms explicites aux variables (mêmes locales) pour aider à mieux
+# comprendre ce que le code est censé faire.
+#
+# 2 - Améliorer la lisibilité du code en limitant la longueur des lignes
+# à 79 caractères (les éditeurs de code peuvent afficher une règle)
+# Quand le code n'est pas entre parenthèses, il faut mettre '\' à la fin
+# de la ligne et continuer sur la ligne suivante
+# voir exemple pour l'initialisation de self.__gares ci-dessous
+#
+# 3 - Améliorer la lisibilité du code, suite:
+# Une fonction ne doit pas être trop longue, et ne devrait faire qu'une
+# seule chose (et le faire bien :-) )
+# Il faudrait découper certaines fonctions/méthodes, notamment __init__
+# en plusieurs petites fonctions (avec des noms explicites):
+# ça aidera à la compréhension du code et au débogage
 
 
 class GUI():
-    #constructeur de l'interface graphique
+    """
+    Classe pour la création de l'interface graphique
+    """
+    # constructeur de l'interface graphique
     def __init__(self):
         self.__table = lit_csv_dict("liste-des-gares.csv",";","UTF-8")
 
-        #on déclare des gares "bidon"
-        self.__gares = extrait_table(self.__table, "DEPARTEMEN", "FINISTERE") + extrait_table(self.__table, "DEPARTEMEN", "COTES-D'ARMOR") +  extrait_table(self.__table, "DEPARTEMEN", "MORBIHAN") + extrait_table(self.__table, "DEPARTEMEN", "ILLE-ET-VILAINE")
+        #on déclare des gares "bidon" - JNG: Pourquoi bidon?
+        # Créer une petite fonction dont le nom permet de comprendre
+        # ce qu'elle fait
+        self.__gares = extrait_table(self.__table, "DEPARTEMEN", "FINISTERE") \
+            + extrait_table(self.__table, "DEPARTEMEN", "COTES-D'ARMOR") \
+            + extrait_table(self.__table, "DEPARTEMEN", "MORBIHAN") \
+            + extrait_table(self.__table, "DEPARTEMEN", "ILLE-ET-VILAINE")
+
         #travail d'ewan
+        # JNG: ne pas oublier d'enlever les "print" de débogage avant de
+        # rendre le projet
+
         print("test : ",self.__gares[0])
         code_ligne = liste_lignes(self.__gares)
 
         print (code_ligne)
 
+        # JNG: La variable 'e' n'est pas utilisée dans la boucle
+        # Le code n'est pas très clair: on a l'impression que 'table_filtree'
+        # est écrasée à chaque tour de boucle
         for e in code_ligne:
             self.table_filtree = projection(self.__gares, "COMMUNE")
             self.table_filtree_finale = []
@@ -59,9 +99,14 @@ class GUI():
 
         self.fenetre.mainloop()
 
-
 #en cours marine
+    # JNG: il faudrait distinguer la fonction appelée lors du clic sur le
+    # bouton de celle servant effectivement à calculer l'itineraire
+    # (module util_dijkastra)
+    # La fonction ci-dessous pourrait par exemple s'appeller:
+    # btn_calcule_itineraire_on_click
     def calcule_itineraire(self):
+
         ville_depart = self.options1.get()
         ville_arrivee = self.options2.get()
         #distance = ('ville_depart' - 'ville_arrivee')
@@ -79,14 +124,14 @@ class GUI():
 #chemin = calcule_itineraire('0', '6', distance)
         #votre code ici
 
-print("le resultat")
+# print("le resultat")
 #travail d'elouan
 def liste_lignes(gares):
     liste = []
     for e in gares:
         if e["CODE_LIGNE"] not in liste :
             liste.append(e["CODE_LIGNE"])
-    print(liste_lignes)
+    # print(liste_lignes)
     return liste
 
 """#print(calcule_itineraire('0', '6', distance))

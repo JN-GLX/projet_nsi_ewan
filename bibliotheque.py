@@ -2,7 +2,7 @@
 
 # Créé par Utilisateur, le 27/02/2022 en Python 3.7
 
-def lit_csv_dict(adresse, separateur = ";", encoding = "utf-8") :
+def lit_csv_dict(adresse, separateur=";", encoding="utf-8"):
     """
     Crée une liste de dictionnaires à partir d'un fichier csv
     paramètres d'entrée :
@@ -15,12 +15,12 @@ def lit_csv_dict(adresse, separateur = ";", encoding = "utf-8") :
 
     tableau = []                               # Le tableau qui contiendra les dictionnaires (un par ligne)
 
-    with open(adresse, "r", encoding = encoding) as fichier :                        # On ouvre le fichier
+    with open(adresse, "r", encoding=encoding) as fichier :                        # On ouvre le fichier
         cles = fichier.readline()                            # La première ligne contient les noms des clés
         cles = cles[:-1].split(separateur)                   # on sépare les différentes cles
 
         for ligne in fichier :                               # On parcourt les lignes suivantes
-            valeurs = ligne[:-1].split(separateur) #on sépare les différentes valeurs de la ligne
+            valeurs = ligne[:-1].split(separateur)  #on sépare les différentes valeurs de la ligne
             dico = dict()                                    # On cree un dictionnaire pour la ligne
             # On remplit le dictionnaire de la ligne
             for cle, valeur in zip(cles, valeurs):
